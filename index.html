@@ -449,7 +449,7 @@ t.stickers.forEach(s=>{
   const k=key(t,s);const v=state[k];
   const d=document.createElement('div');
   d.className='stk'+(s.type==='foil'?' foil':'')+(v===1?' have':v>=2?' rep':'');
-  d.innerHTML=`<span class="stk-num">${s.n}</span><span class="stk-name">${s.label}</span>${s.type==='foil'?'<div class="stk-dot"></div>':''}`;
+  d.innerHTML=`<span class="stk-num">${s.n}</span>${s.type==='foil'?'<div class="stk-dot"></div>':''}`;
   d.addEventListener('touchstart',(e)=>{
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
@@ -542,7 +542,7 @@ function renderSpecialsGrid(){
     const k='SPE'+s.n;const v=state[k];
     const d=document.createElement('div');
     d.className='stk foil'+(v===1?' have':v>=2?' rep':'');
-    d.innerHTML=`<span class="stk-num">${s.n}</span><span class="stk-name">${s.label}</span><div class="stk-dot"></div>`;
+    d.innerHTML=`<span class="stk-num">${s.n}</span><div class="stk-dot"></div>`;
     d.addEventListener('touchstart',(e)=>{
   startX=e.touches[0].clientX;
   startY=e.touches[0].clientY;
