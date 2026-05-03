@@ -348,7 +348,16 @@ function renderTeamDetail(t){
   d.addEventListener('touchstart',(e)=>{
     startX=e.touches[0].clientX;
     startY=e.touches[0].clientY;
-    dragTimer=setTimeout(()=>{isDragging=true;},300);
+    dragTimer=setTimeout(()=>{
+  isDragging=true;
+  const k=key(t,s);
+  if(state[k]===0){
+    state[k]=1;
+    save();
+    d.className='stk'+(s.type==='foil'?' foil':'')+' have';
+    upd();renderMiss();renderRep();
+  }
+  },300);
   },{passive:true});
   d.addEventListener('touchend',(e)=>{
     clearTimeout(dragTimer);
