@@ -345,14 +345,36 @@ function renderTeamDetail(t){
     const d=document.createElement('div');
     d.className='stk'+(s.type==='foil'?' foil':'')+(v===1?' have':v>=2?' rep':'');
     d.innerHTML=`<span class="stk-num">${s.n}</span><span class="stk-name">${s.label}</span>${s.type==='foil'?'<div class="stk-dot"></div>':''}`;
-    d.onclick=()=>{state[k]=(state[k]+1)%3;save();renderTeamDetail(t);upd();renderMiss();renderRep();};
     d.addEventListener('touchstart',(e)=>{
-    dragTimer=setTimeout(()=>{isDragging=true;},150);
-    startX=e.touches[0].clientX;
-    startY=e.touches[0].clientY;
-    },{passive:true});
-    d.addEventListener('touchend',()=>{
+  startX=e.touches[0].clientX;
+  startY=e.touches[0].clientY;
+  dragTimer=setTimeout(()=>{isDragging=true;},300);
+},{passive:true});
+d.addEventListener('touchend',(e)=>{
+  clearTimeout(dragTimer);
+  const dx=Math.abs(e.changedTouches[0].clientX-startX);
+  const dy=Math.abs(e.changedTouches[0].clientY-startY);
+  if(!isDragging && dx<8 && dy<8){
+    state[k]=(state[k]+1)%3;
+    save();renderTeamDetail(t);upd();renderMiss();renderRep();
+  }
+  isDragging=false;
+});
+  d.addEventListener('touchstart',(e)=>{
+  startX=e.touches[0].clientX;
+  startY=e.touches[0].clientY;
+  dragTimer=setTimeout(()=>{isDragging=true;},300);
+  },{passive:true});
+  d.addEventListener('touchmove',(e)=>{
+  const dx=Math.abs(e.touches[0].clientX-startX);
+  const dy=Math.abs(e.touches[0].clientY-startY);
+  if(dy>10){
     clearTimeout(dragTimer);
+    isDragging=false;
+  }
+  },{passive:true});
+  d.addEventListener('touchend',()=>{
+  clearTimeout(dragTimer);
   isDragging=false;
 });
     grid.appendChild(d);
