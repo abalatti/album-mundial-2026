@@ -432,6 +432,7 @@ let dragConfirmed=false;
 let dragTimer=null;
 let startX=0;
 let startY=0;
+let isMouseDown=false;
 
 function renderTeamDetail(t){
   currentTeam=t;
@@ -474,8 +475,10 @@ t.stickers.forEach(s=>{
   d.addEventListener('mousedown',(e)=>{
     startX=e.clientX;startY=e.clientY;
     isDragging=false;dragConfirmed=false;
+    isMouseDown=true;
   });
   d.addEventListener('mousemove',(e)=>{
+    if(!isMouseDown)return;
     const dx=Math.abs(e.clientX-startX);
     const dy=Math.abs(e.clientY-startY);
     if(!dragConfirmed&&(dx>8||dy>8)){
@@ -512,7 +515,7 @@ grid.addEventListener('touchmove',(e)=>{
 },{passive:false});
 
 grid.addEventListener('mousemove',(e)=>{
-  if(!isDragging)return;
+  if(!isDragging||!isMouseDown)return;
   const el=document.elementFromPoint(e.clientX,e.clientY);
   if(el){
     const stk=el.closest('.stk');
@@ -526,7 +529,7 @@ grid.addEventListener('mousemove',(e)=>{
     }
   }
 });
-grid.addEventListener('mouseup',()=>{isDragging=false;dragConfirmed=false;});
+grid.addEventListener('mouseup',()=>{isDragging=false;dragConfirmed=false;isMouseDown=false;});
 
 }
 function renderSpecialsGrid(){
