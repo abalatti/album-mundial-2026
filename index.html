@@ -320,12 +320,12 @@ let currentTeam=null;
 TEAMS.forEach(t=>t.stickers.forEach(s=>{state[t.code+s.n]=0;}));
 SPECIALS.forEach(s=>{state['SPE'+s.n]=0;});
 
-let supabase;
+let supabaseClient;
 let currentUser=null;
 
 async function initSupabase(){
-  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-  const {data:{session}}=await supabase.auth.getSession();
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data:{session}}=await supabaseClient.auth.getSession();
   if(session){
     currentUser=session.user;
     await loadFromDB();
@@ -333,7 +333,7 @@ async function initSupabase(){
   } else {
     showLogin();
   }
-  supabase.auth.onAuthStateChange(async(event,session)=>{
+  supabaseClient.auth.onAuthStateChange(async(event,session)=>{
     if(event==='SIGNED_IN'){
       currentUser=session.user;
       await loadFromDB();
@@ -357,29 +357,29 @@ function showApp(){
 }
 
 async function loginWithGoogle(){
-  await supabase.auth.signInWithOAuth({
+  await supabaseClient.auth.signInWithOAuth({
     provider:'google',
     options:{redirectTo:window.location.origin}
   });
 }
 
 async function logout(){
-  await supabase.auth.signOut();
+  await supabaseClient.auth.signOut();
 }
 
 async function save(){
   if(!currentUser)return;
-  const {data}=await supabase.from('progreso').select('id').eq('user_id',currentUser.id).single();
+  const {data}=await supabaseClient.from('progreso').select('id').eq('user_id',currentUser.id).single();
   if(data){
-    await supabase.from('progreso').update({state,updated_at:new Date()}).eq('user_id',currentUser.id);
+    await supabaseClient.from('progreso').update({state,updated_at:new Date()}).eq('user_id',currentUser.id);
   } else {
-    await supabase.from('progreso').insert({user_id:currentUser.id,state});
+    await supabaseClient.from('progreso').insert({user_id:currentUser.id,state});
   }
 }
 
 async function loadFromDB(){
   if(!currentUser)return;
-  const {data}=await supabase.from('progreso').select('state').eq('user_id',currentUser.id).single();
+  const {data}=await supabaseClient.from('progreso').select('state').eq('user_id',currentUser.id).single();
   if(data) state=data.state;
 }
 
