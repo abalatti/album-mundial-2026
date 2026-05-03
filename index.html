@@ -6,6 +6,7 @@
 <title>Álbum Mundial 2026 · Panini</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
@@ -121,7 +122,19 @@ body{font-family:'Outfit',sans-serif;background:#0a1628}
 </style>
 </head>
 <body>
-<div class="app">
+<!-- PANTALLA LOGIN -->
+<div id="login-screen" style="display:flex;position:fixed;inset:0;background:#0a1628;flex-direction:column;align-items:center;justify-content:center;z-index:999">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:4px;color:#fff;line-height:1">MUNDIAL</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:52px;color:#f5c518;letter-spacing:4px;margin-bottom:8px">2026</div>
+  <div style="font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;text-transform:uppercase;margin-bottom:40px">Álbum Panini Oficial</div>
+  <button onclick="loginWithGoogle()" style="background:#fff;color:#333;border:none;padding:14px 28px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:'Outfit',sans-serif">
+    <img src="https://www.google.com/favicon.ico" width="18" height="18">
+    Entrar con Google
+  </button>
+</div>
+
+<div id="app" style="display:none">
+
 
   <div class="screen" id="screen-main">
     <div class="main-header">
@@ -129,7 +142,10 @@ body{font-family:'Outfit',sans-serif;background:#0a1628}
         <div class="ht1">MUNDIAL</div>
         <div class="ht2">2026</div>
       </div>
-      <div class="ht-sub">Álbum Panini Oficial · 980 figuritas</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+  <div class="ht-sub">Álbum Panini Oficial · 980 figuritas</div>
+  <button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);font-size:11px;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif">Salir</button>
+</div>
     </div>
     <div class="stats">
       <div class="stat"><div class="stat-bar g"></div><div class="stat-n g" id="sH">0</div><div class="stat-l">Tengo</div></div>
@@ -232,7 +248,13 @@ body{font-family:'Outfit',sans-serif;background:#0a1628}
   </div>
 
 </div>
+</div>
+
 <script>
+  // SUPABASE CONFIG
+const SUPABASE_URL = 'https://ohayggknxmzgwgjderaj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_bvKdfyp5DWLsN5fxExYgIQ_JZIfo-BM';
+
 const TEAMS=[
   {name:"Argentina",flag:"🇦🇷",code:"ARG",group:"J",stickers:[{n:1,label:"Escudo",type:"foil"},{n:2,label:"E. Martínez"},{n:3,label:"N. Molina"},{n:4,label:"C. Romero"},{n:5,label:"Otamendi"},{n:6,label:"Tagliafico"},{n:7,label:"Balerdi"},{n:8,label:"Enzo Fndz."},{n:9,label:"Mac Allister"},{n:10,label:"De Paul"},{n:11,label:"Palacios"},{n:12,label:"Paredes"},{n:13,label:"Foto Equipo",type:"photo"},{n:14,label:"Nico Paz"},{n:15,label:"Mastantuono"},{n:16,label:"N. González"},{n:17,label:"Messi"},{n:18,label:"L. Martínez"},{n:19,label:"J. Álvarez"},{n:20,label:"G. Simeone"}]},
   {name:"Brasil",flag:"🇧🇷",code:"BRA",group:"G",stickers:[{n:1,label:"Escudo",type:"foil"},{n:2,label:"Ederson"},{n:3,label:"Danilo"},{n:4,label:"Marquinhos"},{n:5,label:"G. Magalhães"},{n:6,label:"Alex Sandro"},{n:7,label:"Casemiro"},{n:8,label:"B. Guimarães"},{n:9,label:"Paquetá"},{n:10,label:"Rodrygo"},{n:11,label:"Vinícius Jr."},{n:12,label:"Raphinha"},{n:13,label:"Foto Equipo",type:"photo"},{n:14,label:"Endrick"},{n:15,label:"Savinho"},{n:16,label:"Pedro"},{n:17,label:"Gerson"},{n:18,label:"A. Pereira"},{n:19,label:"Martinelli"},{n:20,label:"Igor Jesus"}]},
@@ -298,14 +320,68 @@ let currentTeam=null;
 TEAMS.forEach(t=>t.stickers.forEach(s=>{state[t.code+s.n]=0;}));
 SPECIALS.forEach(s=>{state['SPE'+s.n]=0;});
 
-function save(){try{localStorage.setItem('album2026',JSON.stringify(state));}catch(e){}}
-function load(){
-  try{
-    const d=localStorage.getItem('album2026');
-    if(d){const saved=JSON.parse(d);if(Object.keys(saved).length===TOTAL){state=saved;}else{localStorage.removeItem('album2026');}}
-  }catch(e){localStorage.removeItem('album2026');}
+let supabase;
+let currentUser=null;
+
+async function initSupabase(){
+  supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const {data:{session}}=await supabase.auth.getSession();
+  if(session){
+    currentUser=session.user;
+    await loadFromDB();
+    showApp();
+  } else {
+    showLogin();
+  }
+  supabase.auth.onAuthStateChange(async(event,session)=>{
+    if(event==='SIGNED_IN'){
+      currentUser=session.user;
+      await loadFromDB();
+      showApp();
+    } else if(event==='SIGNED_OUT'){
+      currentUser=null;
+      showLogin();
+    }
+  });
 }
-load();
+
+function showLogin(){
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('app').style.display='none';
+}
+
+function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  renderTeamsGrid();upd();renderMiss();renderRep();
+}
+
+async function loginWithGoogle(){
+  await supabase.auth.signInWithOAuth({
+    provider:'google',
+    options:{redirectTo:window.location.origin}
+  });
+}
+
+async function logout(){
+  await supabase.auth.signOut();
+}
+
+async function save(){
+  if(!currentUser)return;
+  const {data}=await supabase.from('progreso').select('id').eq('user_id',currentUser.id).single();
+  if(data){
+    await supabase.from('progreso').update({state,updated_at:new Date()}).eq('user_id',currentUser.id);
+  } else {
+    await supabase.from('progreso').insert({user_id:currentUser.id,state});
+  }
+}
+
+async function loadFromDB(){
+  if(!currentUser)return;
+  const {data}=await supabase.from('progreso').select('state').eq('user_id',currentUser.id).single();
+  if(data) state=data.state;
+}
 
 function key(t,s){return t.code+s.n;}
 
@@ -506,7 +582,7 @@ function share(){
   navigator.clipboard.writeText(txt).then(()=>alert('¡Lista copiada!'),()=>prompt('Copiá esto:',txt));
 }
 
-renderTeamsGrid();upd();renderMiss();renderRep();
+initSupabase();
 </script>
 </body>
 </html>
