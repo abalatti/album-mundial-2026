@@ -345,7 +345,12 @@ let supabaseClient;
 let currentUser=null;
 
 async function initSupabase(){
-  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
+    auth:{
+      detectSessionInUrl:true,
+      persistSession:true,
+    }
+  });
   const {data:{session}}=await supabaseClient.auth.getSession();
   if(session){
     currentUser=session.user;
