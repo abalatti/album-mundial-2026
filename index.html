@@ -356,7 +356,10 @@ d.addEventListener('touchend',(e)=>{
   const dy=Math.abs(e.changedTouches[0].clientY-startY);
   if(!isDragging && dx<8 && dy<8){
     state[k]=(state[k]+1)%3;
-    save();renderTeamDetail(t);upd();renderMiss();renderRep();
+    save();
+    const newV=state[k];
+    d.className='stk'+(s.type==='foil'?' foil':'')+(newV===1?' have':newV>=2?' rep':'');
+    upd();renderMiss();renderRep();
   }
   isDragging=false;
 });
