@@ -326,6 +326,9 @@ function upd(){
 }
 
 let isDragging=false;
+let dragTimer=null;
+let startX=0;
+let startY=0;
 function renderTeamDetail(t){
   currentTeam=t;
   const have=t.stickers.filter(s=>state[key(t,s)]>=1).length;
@@ -343,17 +346,26 @@ function renderTeamDetail(t){
     d.className='stk'+(s.type==='foil'?' foil':'')+(v===1?' have':v>=2?' rep':'');
     d.innerHTML=`<span class="stk-num">${s.n}</span><span class="stk-name">${s.label}</span>${s.type==='foil'?'<div class="stk-dot"></div>':''}`;
     d.onclick=()=>{state[k]=(state[k]+1)%3;save();renderTeamDetail(t);upd();renderMiss();renderRep();};
-    d.addEventListener('touchstart',()=>{isDragging=true;},{ passive:true });
-    d.addEventListener('touchend',()=>{isDragging=false;});
+    d.addEventListener('touchstart',(e)=>{
+    dragTimer=setTimeout(()=>{isDragging=true;},150);
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    },{passive:true});
+    d.addEventListener('touchend',()=>{
+    clearTimeout(dragTimer);
+  isDragging=false;
+});
     grid.appendChild(d);
   });
 
-  grid.addEventListener('touchmove',(e)=>{
-    if(!isDragging) return;
-    const touch=e.touches[0];
-    const el=document.elementFromPoint(touch.clientX,touch.clientY);
-    if(el && el.closest('.stk')){
-      const stk=el.closest('.stk');
+ grid.addEventListener('touchmove',(e)=>{
+  if(!isDragging) return;
+  e.preventDefault();
+  const touch=e.touches[0];
+  const el=document.elementFromPoint(touch.clientX,touch.clientY);
+  if(el){
+    const stk=el.closest('.stk');
+    if(stk){
       const idx=Array.from(grid.children).indexOf(stk);
       if(idx>=0 && idx<t.stickers.length){
         const s=t.stickers[idx];
@@ -366,7 +378,8 @@ function renderTeamDetail(t){
         }
       }
     }
-  },{passive:true});
+  }
+},{passive:false});
 }
 
 function renderSpecialsGrid(){
