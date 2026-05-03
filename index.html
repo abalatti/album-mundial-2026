@@ -37,6 +37,7 @@ body{font-family:'Outfit',sans-serif;background:#0a1628}
 .prog-label strong{font-size:10px;color:#555;font-weight:700}
 .prog-track{height:5px;background:#eee;border-radius:3px;overflow:hidden}
 .prog-fill{height:100%;background:#1a7a3c;border-radius:3px;transition:width .4s;width:0%}
+.sticky-bar{position:sticky;top:0;z-index:100;background:#f4f4f4}
 
 .tabs{display:flex;padding:10px 14px;gap:6px}
 .tab{flex:1;padding:8px 0;font-size:12px;font-weight:600;border:0.5px solid #ddd;border-radius:10px;background:#fff;color:#888;cursor:pointer;text-align:center;letter-spacing:.3px}
@@ -147,19 +148,21 @@ body{font-family:'Outfit',sans-serif;background:#0a1628}
   <button onclick="logout()" style="background:rgba(255,255,255,0.1);border:none;color:rgba(255,255,255,0.6);font-size:11px;padding:5px 10px;border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif">Salir</button>
 </div>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="stat-bar g"></div><div class="stat-n g" id="sH">0</div><div class="stat-l">Tengo</div></div>
-      <div class="stat"><div class="stat-bar r"></div><div class="stat-n r" id="sM">980</div><div class="stat-l">Faltan</div></div>
-      <div class="stat"><div class="stat-bar a"></div><div class="stat-n a" id="sR">0</div><div class="stat-l">Repet.</div></div>
-    </div>
-    <div class="prog-wrap">
-      <div class="prog-label"><span>Completado</span><strong id="pp">0 / 980</strong></div>
-      <div class="prog-track"><div class="prog-fill" id="pf"></div></div>
-    </div>
-    <div class="tabs">
-      <button class="tab active" onclick="showTab('album',this)">Álbum</button>
-      <button class="tab" onclick="showTab('faltan',this)">Me faltan</button>
-      <button class="tab" onclick="showTab('repetidas',this)">Repetidas</button>
+    <div class="sticky-bar">
+      <div class="stats">
+        <div class="stat"><div class="stat-bar g"></div><div class="stat-n g" id="sH">0</div><div class="stat-l">Tengo</div></div>
+        <div class="stat"><div class="stat-bar r"></div><div class="stat-n r" id="sM">980</div><div class="stat-l">Faltan</div></div>
+        <div class="stat"><div class="stat-bar a"></div><div class="stat-n a" id="sR">0</div><div class="stat-l">Repet.</div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-label"><span>Completado</span><strong id="pp">0 / 980</strong></div>
+        <div class="prog-track"><div class="prog-fill" id="pf"></div></div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" onclick="showTab('album',this)">Álbum</button>
+        <button class="tab" onclick="showTab('faltan',this)">Me faltan</button>
+        <button class="tab" onclick="showTab('repetidas',this)">Repetidas</button>
+      </div>
     </div>
     <div class="section active" id="tab-album">
       <input class="search" type="text" placeholder="Buscar selección..." id="srch" oninput="filterTeams()">
